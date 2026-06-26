@@ -1,0 +1,43 @@
+# Default bot configuration. Override per-run with --config <file> or CLI flags.
+
+# Which symbols to trade.
+symbols:
+  - AAPL
+  - MSFT
+
+# Starting cash for the simulated portfolio (paper/backtest).
+starting_cash: 100000
+
+# Strategy selection. One of: sma_crossover, rsi
+strategy:
+  name: sma_crossover
+  params:
+    fast: 10
+    slow: 30
+    # For rsi strategy instead, use e.g.:
+    # period: 14
+    # oversold: 30
+    # overbought: 70
+
+# Risk management — applied to every order before it reaches the broker.
+risk:
+  # Fraction of total equity to allocate per position (0.0 - 1.0).
+  max_position_pct: 0.20
+  # Hard cap on number of concurrent open positions.
+  max_open_positions: 5
+  # Per-trade stop loss / take profit as fractions of entry price.
+  stop_loss_pct: 0.03
+  take_profit_pct: 0.06
+  # Halt all new entries if equity drops this far below the session peak.
+  max_drawdown_pct: 0.15
+
+# Data feed. For backtests this points at the historical source.
+data:
+  # source: synthetic | csv | alpaca
+  source: synthetic
+  # For source: csv -> directory containing <SYMBOL>.csv files (date,open,high,low,close,volume)
+  csv_dir: data
+  # For source: synthetic -> generated bars per symbol
+  synthetic_bars: 500
+  # Bar timeframe for live trading (alpaca): 1Min, 5Min, 15Min, 1Hour, 1Day
+  timeframe: 1Day

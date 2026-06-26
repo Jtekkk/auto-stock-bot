@@ -1,0 +1,6 @@
+# Core runtime — the bot runs fully offline with only these.
+PyYAML>=6.0
+
+# Optional: live/paper trading + real market data via Alpaca.
+# Install with:  pip install -r requirements-live.txt
+# (kept out of the core deps so the backtester stays dependency-light)

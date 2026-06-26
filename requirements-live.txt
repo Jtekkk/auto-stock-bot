@@ -1,0 +1,4 @@
+# Live / paper trading against a real broker (Alpaca) with real market data.
+# These are NOT needed for backtesting or the offline demo.
+-r requirements.txt
+alpaca-py>=0.21.0
