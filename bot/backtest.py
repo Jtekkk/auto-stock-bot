@@ -21,6 +21,19 @@ from bot.types import Bar
 
 
 def run_backtest(config: Config, feed: DataFeed, verbose: bool = False) -> Metrics:
+    """Run a backtest and return its performance metrics."""
+    metrics, _ = run_backtest_detailed(config, feed, verbose=verbose)
+    return metrics
+
+
+def run_backtest_detailed(
+    config: Config, feed: DataFeed, verbose: bool = False
+) -> tuple[Metrics, Portfolio]:
+    """Run a backtest, returning both metrics and the resulting portfolio.
+
+    The portfolio carries the full trade log and equity curve, which callers
+    (e.g. the CLI ``--export`` flag) use for CSV export.
+    """
     strategy = build_strategy(config.strategy.name, config.strategy.params)
     portfolio = Portfolio(config.starting_cash)
     risk = RiskManager(config.risk)
@@ -64,9 +77,10 @@ def run_backtest(config: Config, feed: DataFeed, verbose: bool = False) -> Metri
         broker.set_market({symbol: price}, final_ts)
         portfolio.close_long(symbol, price, final_ts, reason="end-of-backtest liquidation")
 
-    return compute_metrics(
+    metrics = compute_metrics(
         config.starting_cash, portfolio.equity_curve, portfolio.trades, portfolio.realized_pnl
     )
+    return metrics, portfolio
 
 
 def _shared_timeline(series: dict[str, list[Bar]]) -> list[datetime]:

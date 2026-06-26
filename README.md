@@ -71,9 +71,41 @@ Data feed ──► Strategy ──► Risk manager ──► Broker ──► P
 - **`sma_crossover`** — trend following. Enter long when the fast SMA crosses
   above the slow SMA; exit on the reverse cross.
   Params: `fast` (10), `slow` (30).
+- **`macd`** — trend following. Enter when the MACD line crosses above its
+  signal line; exit on the reverse cross.
+  Params: `fast` (12), `slow` (26), `signal` (9).
 - **`rsi`** — mean reversion. Enter when RSI recovers out of oversold; exit when
   it reaches overbought.
   Params: `period` (14), `oversold` (30), `overbought` (70).
+- **`bollinger`** — mean reversion. Enter when price reclaims the lower band
+  after dipping below it; exit when it reverts to the middle band.
+  Params: `period` (20), `num_std` (2.0).
+
+### Optimizing parameters
+
+Grid-search a strategy's parameters and rank by a metric:
+
+```bash
+python main.py optimize --strategy sma_crossover \
+  --grid "fast=5,10,20;slow=30,50,100" --metric sharpe --top 10
+```
+
+Invalid combinations (e.g. `fast >= slow`) are skipped automatically. Metrics
+you can rank by: `sharpe`, `total_return_pct`, `profit_factor`, `win_rate_pct`,
+`ending_equity`.
+
+> ⚠️ Grid search overfits easily — a combo that tops the in-sample ranking may
+> do nothing out-of-sample. Treat results as hypotheses and validate on data
+> the search never saw.
+
+### Exporting results
+
+Write the trade log and equity curve to CSV for plotting/analysis:
+
+```bash
+python main.py backtest --strategy macd --export runs/macd-aapl
+# -> runs/macd-aapl/trades.csv, runs/macd-aapl/equity_curve.csv
+```
 
 ### Adding your own
 
@@ -159,14 +191,16 @@ bot/
   config.py         # YAML config loading + validation
   indicators.py     # SMA / EMA / RSI over plain lists
   data/             # data feeds (synthetic, csv, alpaca)
-  strategy/         # strategy interface + sma_crossover, rsi
+  strategy/         # strategy interface + sma_crossover, macd, rsi, bollinger
   risk.py           # position sizing & risk gating
   portfolio.py      # cash/positions/P&L/equity curve
   broker/           # paper (simulated) + alpaca brokers
   engine.py         # per-bar trading loop
   backtest.py       # historical replay
+  optimize.py       # grid-search parameter optimization
   live.py           # live/paper polling loop
   metrics.py        # performance metrics + report
+  report.py         # CSV export (trades, equity curve)
   cli.py            # argparse CLI
 main.py             # entrypoint
 tests/              # pytest suite
@@ -174,8 +208,8 @@ tests/              # pytest suite
 
 ## Roadmap ideas
 
-- More strategies (MACD, Bollinger bands, breakout)
 - Short selling and bracket orders
-- Parameter optimization / walk-forward analysis
-- Equity-curve plotting and trade-log export
+- Walk-forward / out-of-sample validation on top of the grid search
+- Equity-curve plotting (matplotlib) from the exported CSV
 - Crypto support via ccxt
+- Live-loop position reconciliation against the broker account

@@ -61,5 +61,7 @@ def _hold(bars: list[Bar], reason: str = "") -> Signal:
 
 
 # Importing the built-ins registers them. Done at the bottom to avoid cycles.
+from bot.strategy import bollinger as _bollinger  # noqa: E402,F401
+from bot.strategy import macd as _macd  # noqa: E402,F401
 from bot.strategy import rsi as _rsi  # noqa: E402,F401
 from bot.strategy import sma_crossover as _sma  # noqa: E402,F401
